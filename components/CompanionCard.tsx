@@ -1,6 +1,7 @@
 "use client";
 import { removeBookmark } from "@/lib/actions/companion.actions";
 import { addBookmark } from "@/lib/actions/companion.actions";
+import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,9 +28,11 @@ const CompanionCard = ({
 }: CompanionCardProps) => {
   const pathname = usePathname();
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+const { isSignedIn } = useAuth();
 
-  const handleBookmark = async () => {
+ const handleBookmark = async () => {
     try {
+      if (!isSignedIn) return;
       if (isBookmarked) {
         await removeBookmark(id, pathname);
         setIsBookmarked(false);
@@ -46,7 +49,12 @@ const CompanionCard = ({
     <article className="companion-card" style={{ backgroundColor: color }}>
       <div className="flex justify-between items-center">
         <div className="subject-badge">{subject}</div>
-        <button className="companion-bookmark" onClick={handleBookmark}>
+        <button
+          className="companion-bookmark"
+          onClick={handleBookmark}
+          disabled={!isSignedIn}
+          title={!isSignedIn ? "Sign in to bookmark" : ""}
+        >
           <Image
             src={
               isBookmarked
