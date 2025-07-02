@@ -86,15 +86,13 @@ export const addToSessionHistory = async (companionId: string) => {
 
 export const getRecentSessions = async (limit = 10) => {
   const supabase = createSupabaseClient();
+
   const { data, error } = await supabase
-    .from("session_history")
-    .select(`companions:companion_id (*)`)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .rpc("get_unique_recent_companions", { limit_count: limit });
 
   if (error) throw new Error(error.message);
 
-  return data.map(({ companions }) => companions);
+  return data; 
 };
 
 export const getUserSessions = async (userId: string, limit = 10) => {
